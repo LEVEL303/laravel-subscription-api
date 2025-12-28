@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\LogoutController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -17,3 +18,6 @@ Route::get('/email/verify/{id}/{hash}', VerifyEmailController::class)
     ->name('verification.verify');
 
 Route::post('/login', [LoginController::class, 'store'])->name('login.store');
+Route::post('/logout', LogoutController::class)
+    ->middleware('auth:sanctum')
+    ->name('logout');
