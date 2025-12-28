@@ -6,6 +6,8 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\LogoutController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
+use App\Http\Controllers\Auth\ResetPasswordController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -21,3 +23,6 @@ Route::post('/login', [LoginController::class, 'store'])->name('login.store');
 Route::post('/logout', LogoutController::class)
     ->middleware('auth:sanctum')
     ->name('logout');
+
+Route::post('/forgot-password', ForgotPasswordController::class)->name('password.email');
+Route::post('/reset-password', ResetPasswordController::class)->name('password.update');
