@@ -8,6 +8,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\LogoutController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
+use App\Http\Controllers\PlanController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -26,3 +27,7 @@ Route::post('/logout', LogoutController::class)
 
 Route::post('/forgot-password', ForgotPasswordController::class)->name('password.email');
 Route::post('/reset-password', ResetPasswordController::class)->name('password.update');
+
+Route::middleware(['auth:sanctum', 'admin'])->group(function () {
+    Route::apiResource('plans', PlanController::class);
+});

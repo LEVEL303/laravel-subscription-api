@@ -1,0 +1,29 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Plan;
+use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+
+class PlanController extends Controller
+{
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:191', 'unique:plans,name'],
+            'description' => ['required', 'string'],
+            'price' => ['required', 'integer'],
+            'period' => ['required', 'string', 'in:monthly,yearly'],
+            'status' => ['required', 'string', 'in:active,inactive'],
+        ]);
+
+        $validated['slug'] = Str::slug($validated['name']);
+
+        Plan::create($validated);
+
+        return response()->json([
+            'message' => 'Plano cadastrado com sucesso!'
+        ], 201);
+    }
+}
