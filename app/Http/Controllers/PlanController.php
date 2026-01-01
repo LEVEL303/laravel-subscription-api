@@ -5,9 +5,25 @@ namespace App\Http\Controllers;
 use App\Models\Plan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Auth;
 
 class PlanController extends Controller
 {
+    public function index(Request $request)
+    {  
+        $user = Auth::guard('sanctum')->user();
+
+        if ($user && $user->role === 'admin') {
+            return response()->json(Plan::all(), 200);
+        }
+
+        $plans = Plan::where('status', 'active')
+            ->select('id', 'name', 'description', 'price', 'period')
+            ->get();
+
+        return response()->json($plans, 200);
+    }
+
     public function store(Request $request)
     {
         $validated = $request->validate([

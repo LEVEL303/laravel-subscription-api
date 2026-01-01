@@ -19,6 +19,53 @@ class PlanTest extends TestCase
         return $admin;
     }
 
+    public function testPublicUserCanListActivePlans()
+    {
+        Plan::factory()->create([
+            'name' => 'Plano Ativo',
+            'status' => 'active',
+        ]);
+
+        Plan::factory()->create([
+            'name' => 'Plano Inativo',
+            'status' => 'Inactive',
+        ]);
+
+        $response = $this->getJson(route('plans.index'));
+
+        $response->assertStatus(200);
+        $response->assertJsonCount(1);
+        $response->assertJsonFragment(['name' => 'Plano Ativo']);
+        $response->assertJsonMissing(['name' => 'Plano Inativo']);
+
+        $data = $response->json()[0];
+        $this->assertArrayNotHasKey('status', $data);
+    }
+
+    public function testAdminCanListAllPlansWithAllDetails()
+    {
+        Plan::factory()->create([
+            'name' => 'Plano Ativo',
+            'status' => 'active',
+        ]);
+
+        Plan::factory()->create([
+            'name' => 'Plano Inativo',
+            'status' => 'inactive',
+        ]);
+
+        $this->signInAsAdmin();
+
+        $response = $this->getJson(route('plans.index'));
+
+        $response->assertStatus(200);
+        $response->assertJsonCount(2);
+        $response->assertJsonFragment(['name' => 'Plano Inativo']);
+
+        $data = $response->json()[0];
+        $this->assertArrayHasKey('status', $data);
+    }
+
     public function testAdminCanCreateAPlan()
     {
         $this->signInAsAdmin();

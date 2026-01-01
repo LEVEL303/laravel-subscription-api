@@ -28,6 +28,8 @@ Route::post('/logout', LogoutController::class)
 Route::post('/forgot-password', ForgotPasswordController::class)->name('password.email');
 Route::post('/reset-password', ResetPasswordController::class)->name('password.update');
 
+Route::get('/plans', [PlanController::class, 'index'])->name('plans.index');
+
 Route::middleware(['auth:sanctum', 'admin'])->group(function () {
-    Route::apiResource('plans', PlanController::class);
+    Route::post('/plans', [PlanController::class, 'store'])->name('plans.store');
 });
