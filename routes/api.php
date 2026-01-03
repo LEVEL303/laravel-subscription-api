@@ -32,4 +32,5 @@ Route::get('/plans', [PlanController::class, 'index'])->name('plans.index');
 
 Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::post('/plans', [PlanController::class, 'store'])->name('plans.store');
+    Route::put('/plans/{plan}', [PlanController::class, 'update'])->name('plans.update');
 });

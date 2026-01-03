@@ -17,6 +17,7 @@ return new class extends Migration
             $table->foreignId('plan_id')->constrained();
             $table->string('gateway_id')->nullable();
             $table->string('status')->default('pending');
+            $table->integer('locked_price');
             $table->timestamp('started_at')->nullable();
             $table->timestamp('ends_at')->nullable();
             $table->timestamp('trial_ends_at')->nullable();

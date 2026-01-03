@@ -42,4 +42,23 @@ class PlanController extends Controller
             'message' => 'Plano cadastrado com sucesso!'
         ], 201);
     }
+
+    public function update(Request $request, Plan $plan)
+    {
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:191', 'unique:plans,name,' . $plan->id],
+            'description' => ['required', 'string'],
+            'price' => ['required', 'integer'],
+            'period' => ['required', 'string', 'in:monthly,yearly'],
+            'status' => ['required', 'string', 'in:active,inactive'],
+        ]);
+
+        $validated['slug'] = Str::slug($validated['name']);
+
+        $plan->update($validated);
+
+        return response()->json([
+            'message' => 'Plano atualizado com sucesso!'
+        ], 200);
+    }
 }

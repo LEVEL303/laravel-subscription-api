@@ -120,4 +120,79 @@ class PlanTest extends TestCase
 
         $response->assertStatus(403);
     }
+
+    public function testAdminCanUpdateAPlan()
+    {
+        $this->signInAsAdmin();
+
+        $plan = Plan::factory()->create([
+            'name' => 'Plano Antigo',
+            'price' => 2000,
+            'period' => 'monthly',
+            'status' => 'inactive',
+        ]);
+
+        $response = $this->putJson(route('plans.update', $plan->id), [
+            'name' => 'Plano Novo',
+            'description' => 'Descrição atualizada',
+            'price' => 3000,
+            'period' => 'yearly',
+            'status' => 'active',
+        ]);
+
+        $response->assertStatus(200);
+        $response->assertJson(['message' => 'Plano atualizado com sucesso!']);
+
+        $this->assertDatabaseHas('plans', [
+            'id' => $plan->id,
+            'name' => 'Plano Novo',
+            'slug' => 'plano-novo',
+            'description' => 'Descrição atualizada',
+            'price' => 3000,
+            'period' => 'yearly',
+            'status' => 'active',
+        ]);
+    }
+
+    public function testPlanUpdateValidatesUniqueField()
+    {
+        $this->signInAsAdmin();
+
+        Plan::factory()->create(['name' => 'Plano Existente']);
+        $otherPlan = Plan::factory()->create(['name' => 'Outro Plano']);
+
+        $response = $this->putJson(route('plans.update', $otherPlan->id), [
+            'name' => 'Plano Existente',
+        ]);
+
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['name']);
+    }
+
+    public function testRegularUserCannotUpdatePlan()
+    {
+        $user = User::factory()->create(['role' => 'user']);
+        Sanctum::actingAs($user, ['*']);
+
+        $plan = Plan::factory()->create([
+            'name' => 'Plano Pro',
+            'price' => 3000,
+            'status' => 'active',
+        ]);
+
+        $response = $this->putJson(route('plans.update', $plan->id), [
+            'name' => 'Plano Alterado',
+            'price' => 0,
+            'status' => 'inactive',
+        ]);
+
+        $response->assertStatus(403);
+
+        $this->assertDatabaseHas('plans', [
+            'id' => $plan->id,
+            'name' => 'Plano Pro',
+            'price' => 3000,
+            'status' => 'active',
+        ]);
+    }
 }
