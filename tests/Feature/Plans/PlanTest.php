@@ -20,7 +20,7 @@ class PlanTest extends TestCase
         return $admin;
     }
 
-    public function testPublicUserCanListActivePlans()
+    public function testRegularUserCanListActivePlans()
     {
         Plan::factory()->create([
             'name' => 'Plano Ativo',
@@ -67,7 +67,7 @@ class PlanTest extends TestCase
         $this->assertArrayHasKey('status', $data);
     }
 
-    public function testAdminCanCreateAPlan()
+    public function testAdminCanCreatePlan()
     {
         $this->signInAsAdmin();
 
@@ -122,7 +122,7 @@ class PlanTest extends TestCase
         $response->assertStatus(403);
     }
 
-    public function testAdminCanUpdateAPlan()
+    public function testAdminCanUpdatePlan()
     {
         $this->signInAsAdmin();
 
@@ -248,5 +248,42 @@ class PlanTest extends TestCase
         $response->assertStatus(403);
 
         $this->assertDatabaseHas('plans', ['id' => $plan->id]);
+    }
+
+    public function testRegularUserCanViewActivePlanDetails()
+    {
+        $plan = Plan::factory()->create([
+            'name' => 'Plano Pro',
+            'slug' => 'plano-pro',
+            'status' => 'active',
+        ]);
+
+        $response = $this->getJson(route('plans.show', $plan));
+
+        $response->assertStatus(200);
+        $response->assertJsonFragment(['name' => 'Plano Pro']);
+
+        $data = $response->json();
+        $this->assertArrayNotHasKey('status', $data);
+    }
+
+    public function testRegularUserCannotViewInactivePlan()
+    {
+        $plan = Plan::factory()->create(['status' => 'inactive']);
+
+        $response = $this->getJson(route('plans.show', $plan));
+
+        $response->assertStatus(404);
+    }
+
+    public function testAdminCanViewInactivePlan()
+    {
+        $this->signInAsAdmin();
+        $plan = Plan::factory()->create(['status' => 'inactive']);
+
+        $response = $this->getJson(route('plans.show', $plan));
+
+        $response->assertStatus(200);
+        $response->assertJsonFragment(['status' => 'inactive']);
     }
 }

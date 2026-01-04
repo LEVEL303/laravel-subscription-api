@@ -29,6 +29,7 @@ Route::post('/forgot-password', ForgotPasswordController::class)->name('password
 Route::post('/reset-password', ResetPasswordController::class)->name('password.update');
 
 Route::get('/plans', [PlanController::class, 'index'])->name('plans.index');
+Route::get('plans/{plan:slug}', [PlanController::class, 'show'])->name('plans.show');
 
 Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::post('/plans', [PlanController::class, 'store'])->name('plans.store');

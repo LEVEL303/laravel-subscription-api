@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Auth;
 
 class PlanController extends Controller
 {
-    public function index(Request $request)
+    public function index()
     {  
         $user = Auth::guard('sanctum')->user();
 
@@ -18,7 +18,7 @@ class PlanController extends Controller
         }
 
         $plans = Plan::where('status', 'active')
-            ->select('id', 'name', 'description', 'price', 'period')
+            ->select('id', 'name', 'slug', 'description', 'price', 'period')
             ->get();
 
         return response()->json($plans, 200);
@@ -66,7 +66,7 @@ class PlanController extends Controller
     {
         if ($plan->subscriptions()->exists()) {
             $plan->update(['status' => 'inactive']);
-            
+
             return response()->json([
                 'message' => 'Plano inativado pois possui assinaturas vinculadas.'
             ], 200);
@@ -77,5 +77,23 @@ class PlanController extends Controller
         return response()->json([
             'message' => 'Plano excluído com sucesso!'
         ], 200);
+    }
+
+    public function show(Plan $plan)
+    {
+        $user = Auth::guard('sanctum')->user();
+
+        if ($user && $user->role === 'admin') {
+            return response()->json($plan, 200);
+        }
+
+        if ($plan->status === "active") {
+            return response()->json(
+                $plan->only(['id', 'name', 'slug', 'description', 'price', 'period']),
+                200
+            );
+        }
+
+        abort(404);
     }
 }
