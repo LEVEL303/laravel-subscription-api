@@ -61,4 +61,21 @@ class PlanController extends Controller
             'message' => 'Plano atualizado com sucesso!'
         ], 200);
     }
+
+    public function destroy(Plan $plan)
+    {
+        if ($plan->subscriptions()->exists()) {
+            $plan->update(['status' => 'inactive']);
+            
+            return response()->json([
+                'message' => 'Plano inativado pois possui assinaturas vinculadas.'
+            ], 200);
+        }
+
+        $plan->delete();
+
+        return response()->json([
+            'message' => 'Plano excluído com sucesso!'
+        ], 200);
+    }
 }

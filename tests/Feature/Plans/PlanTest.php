@@ -4,6 +4,7 @@ namespace Tests\Feature\Plans;
 
 use App\Models\Plan;
 use App\Models\User;
+use App\Models\Subscription;
 use Laravel\Sanctum\Sanctum;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -194,5 +195,58 @@ class PlanTest extends TestCase
             'price' => 3000,
             'status' => 'active',
         ]);
+    }
+
+    public function testAdminCanDeletePlanWithNoSubscriptions()
+    {
+        $this->signInAsAdmin();
+
+        $plan = Plan::factory()->create();
+
+        $response = $this->deleteJson(route('plans.destroy', $plan->id));
+
+        $response->assertStatus(200);
+        $response->assertJson(['message' => 'Plano excluído com sucesso!']);
+
+        $this->assertDatabaseMissing('plans', ['id' => $plan->id]);
+    }
+
+    public function testPlasIsInactivatedInsteadOfDeletedIfHasSubscriptions()
+    {
+        $this->signInAsAdmin();
+
+        $user = User::factory()->create();
+        $plan = Plan::factory()->create();
+
+        Subscription::create([
+            'user_id' => $user->id,
+            'plan_id' => $plan->id,
+            'locked_price' => 2000,
+            'status' => 'active',
+        ]);
+
+        $response = $this->deleteJson(route('plans.destroy', $plan->id));
+
+        $response->assertStatus(200);
+        $response->assertJson(['message' => 'Plano inativado pois possui assinaturas vinculadas.']);
+
+        $this->assertDatabaseHas('plans', [
+            'id' => $plan->id,
+            'status' => 'inactive',
+        ]);
+    }
+
+    public function testRegularUserCannotDeletePlan()
+    {
+        $user = User::factory()->create(['role' => 'user']);
+        Sanctum::actingAs($user, ['*']);
+
+        $plan = Plan::factory()->create();
+
+        $response = $this->deleteJson(route('plans.destroy', $plan->id));
+
+        $response->assertStatus(403);
+
+        $this->assertDatabaseHas('plans', ['id' => $plan->id]);
     }
 }

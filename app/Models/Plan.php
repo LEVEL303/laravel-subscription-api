@@ -21,4 +21,9 @@ class Plan extends Model
     protected $casts = [
         'price' => 'integer',
     ];
+
+    public function subscriptions()
+    {
+        return $this->hasMany(Subscription::class);
+    }
 }
