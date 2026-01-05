@@ -8,6 +8,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\LogoutController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
+use App\Http\Controllers\PlanController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -26,3 +27,12 @@ Route::post('/logout', LogoutController::class)
 
 Route::post('/forgot-password', ForgotPasswordController::class)->name('password.email');
 Route::post('/reset-password', ResetPasswordController::class)->name('password.update');
+
+Route::get('/plans', [PlanController::class, 'index'])->name('plans.index');
+Route::get('plans/{plan:slug}', [PlanController::class, 'show'])->name('plans.show');
+
+Route::middleware(['auth:sanctum', 'admin'])->group(function () {
+    Route::post('/plans', [PlanController::class, 'store'])->name('plans.store');
+    Route::put('/plans/{plan}', [PlanController::class, 'update'])->name('plans.update');
+    Route::delete('/plans/{plan}', [PlanController::class, 'destroy'])->name('plans.destroy');
+});
