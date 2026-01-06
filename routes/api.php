@@ -9,6 +9,7 @@ use App\Http\Controllers\Auth\LogoutController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\PlanController;
+use App\Http\Controllers\PlanFeatureController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -35,4 +36,7 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::post('/plans', [PlanController::class, 'store'])->name('plans.store');
     Route::put('/plans/{plan}', [PlanController::class, 'update'])->name('plans.update');
     Route::delete('/plans/{plan}', [PlanController::class, 'destroy'])->name('plans.destroy');
+    Route::get('/features', [PlanFeatureController::class, 'index'])->name('features.index');
+    Route::post('/plans/{plan}/features', [PlanFeatureController::class, 'store'])->name('plans.features.store');
+    Route::delete('/plans/{plan}/features/{feature}', [PlanFeatureController::class, 'destroy'])->name('plans.features.destroy');
 });

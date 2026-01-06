@@ -45,6 +45,8 @@ class PlanTest extends TestCase
 
     public function testAdminCanListAllPlansWithAllDetails()
     {
+        $this->signInAsAdmin();
+
         Plan::factory()->create([
             'name' => 'Plano Ativo',
             'status' => 'active',
@@ -54,8 +56,6 @@ class PlanTest extends TestCase
             'name' => 'Plano Inativo',
             'status' => 'inactive',
         ]);
-
-        $this->signInAsAdmin();
 
         $response = $this->getJson(route('plans.index'));
 

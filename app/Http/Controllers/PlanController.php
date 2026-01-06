@@ -12,12 +12,14 @@ class PlanController extends Controller
     public function index()
     {  
         $user = Auth::guard('sanctum')->user();
+        $plans = Plan::with('features');
 
         if ($user && $user->role === 'admin') {
-            return response()->json(Plan::all(), 200);
+            $plans = $plans->get();
+            return response()->json($plans, 200);
         }
 
-        $plans = Plan::where('status', 'active')
+        $plans = $plans->where('status', 'active')
             ->select('id', 'name', 'slug', 'description', 'price', 'period')
             ->get();
 
@@ -81,6 +83,8 @@ class PlanController extends Controller
 
     public function show(Plan $plan)
     {
+        $plan->load('features');
+
         $user = Auth::guard('sanctum')->user();
 
         if ($user && $user->role === 'admin') {
