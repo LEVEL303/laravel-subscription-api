@@ -10,6 +10,8 @@ use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\PlanController;
 use App\Http\Controllers\PlanFeatureController;
+use App\Http\Controllers\SubscriptionController;
+use App\Http\Controllers\WebhookController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -40,3 +42,9 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::post('/plans/{plan}/features', [PlanFeatureController::class, 'store'])->name('plans.features.store');
     Route::delete('/plans/{plan}/features/{feature}', [PlanFeatureController::class, 'destroy'])->name('plans.features.destroy');
 });
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/subscription', [SubscriptionController::class, 'store'])->name('subscriptions.store');
+});
+
+Route::post('/webhooks/payment', [WebhookController::class, 'handle'])->name('webhooks.payment');

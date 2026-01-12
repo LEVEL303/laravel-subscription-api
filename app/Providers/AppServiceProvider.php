@@ -5,6 +5,8 @@ namespace App\Providers;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Auth\Notifications\ResetPassword;
+use App\Interfaces\PaymentGatewayInterface;
+use App\Services\Gateways\MockPaymentGateway;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -13,7 +15,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(PaymentGatewayInterface::class, MockPaymentGateway::class);
     }
 
     /**
