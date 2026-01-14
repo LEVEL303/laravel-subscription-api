@@ -3,8 +3,10 @@
 namespace Tests\Feature\Webhooks;
 
 use App\Models\Subscription;
+use App\Models\User;
 use App\Notifications\SubscriptionActiveNotification;
 use App\Notifications\SubscriptionPaymentFailedNotification;
+use App\Notifications\SubscriptionPlanChangedNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
@@ -65,5 +67,40 @@ class PaymentWebhookTest extends TestCase
         ]);
 
         Notification::assertSentTo($subscription->user, SubscriptionPaymentFailedNotification::class);
+    }
+
+    public function testWebhookActivatesNewPlanAndCancelsOldOne()
+    {
+        Notification::fake();
+        $user = User::factory()->create();
+
+        $oldSub = Subscription::factory()->create([
+            'user_id' => $user->id,
+            'status' => 'active',
+            'created_at' => now()->subMonths(2),
+        ]);
+
+        $newSub = Subscription::factory()->create([
+            'user_id' => $user->id,
+            'status' => 'pending',
+            'gateway_id' => 'tx_swap_999',
+        ]);
+
+        $this->postJson(route('webhooks.payment'), [
+            'event' => 'invoice.paid',
+            'gateway_id' => 'tx_swap_999',
+        ]);
+
+        $this->assertDatabaseHas('subscriptions', [
+            'id' => $oldSub->id,
+            'status' => 'cancelled',
+        ]);
+
+        $this->assertDatabaseHas('subscriptions', [
+            'id' => $newSub->id,
+            'status' => 'active',
+        ]);
+
+        Notification::assertSentTo($user, SubscriptionPlanChangedNotification::class);
     }
 }

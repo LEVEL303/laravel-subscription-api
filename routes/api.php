@@ -44,7 +44,8 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
 });
 
 Route::middleware('auth:sanctum')->group(function () {
-    Route::post('/subscription', [SubscriptionController::class, 'store'])->name('subscriptions.store');
+    Route::post('/subscriptions', [SubscriptionController::class, 'store'])->name('subscriptions.store');
+    Route::post('/subscriptions/swap', [SubscriptionController::class, 'swap'])->name('subscriptions.swap');
 });
 
 Route::post('/webhooks/payment', [WebhookController::class, 'handle'])->name('webhooks.payment');

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Subscription;
 use App\Notifications\SubscriptionActiveNotification;
 use App\Notifications\SubscriptionPaymentFailedNotification;
+use App\Notifications\SubscriptionPlanChangedNotification;
 use Illuminate\Http\Request;
 
 class WebhookController extends Controller
@@ -25,6 +26,20 @@ class WebhookController extends Controller
         }
 
         if ($request->event === 'invoice.paid') {
+
+            $oldSubscription = Subscription::where('user_id', $subscription->user_id)
+                ->where('status', 'active')
+                ->first();
+            
+            $isSwap = $oldSubscription !== null;
+
+            if ($isSwap) {
+                $oldSubscription->update([
+                    'status' => 'cancelled',
+                    'ends_at' => now(),
+                ]);
+            }
+
             $startDate = now();
             $endsDate = $subscription->plan->period === 'yearly'
                 ? $startDate->copy()->addYear()
@@ -36,7 +51,11 @@ class WebhookController extends Controller
                 'ends_at' => $endsDate, 
             ]);
 
-            $subscription->user->notify(new SubscriptionActiveNotification());
+            if ($isSwap) {
+                $subscription->user->notify(new SubscriptionPlanChangedNotification());
+            } else {
+                $subscription->user->notify(new SubscriptionActiveNotification());
+            }
 
             return response()->json(['message' => 'Webhook processed'], 200);
         }
