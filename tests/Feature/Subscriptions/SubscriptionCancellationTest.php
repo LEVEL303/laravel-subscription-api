@@ -40,7 +40,7 @@ class SubscriptionCancellationTest extends TestCase
             'auto_renew' => true,
         ]);
 
-        $response = $this->postJson(route('subscriptions.cancel'));
+        $response = $this->deleteJson(route('subscriptions.cancel'));
 
         $response->assertStatus(200);
         $response->assertJson(['message' => 'Renovação automática cancelada. Seu acesso continua até o fim do período.']);
