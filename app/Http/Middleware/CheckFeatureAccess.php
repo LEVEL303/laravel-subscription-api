@@ -19,7 +19,7 @@ class CheckFeatureAccess
             ->first();
 
         if (!$subscription) {
-            return response()->json(['message', 'Você não possui uma assinatura ativa.'], 403);
+            return response()->json(['message' => 'Você não possui uma assinatura ativa.'], 403);
         }
 
         $hasFeature = $subscription->plan->features->contains('code', $featureCode);

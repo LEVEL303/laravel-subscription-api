@@ -26,4 +26,9 @@ class MockPaymentGateway implements PaymentGatewayInterface
             'amount_to_pay' => $newPlan->price,
         ];
     }
+
+    public function cancelSubscription(string $gatewayId): void
+    {
+        return;
+    }
 }

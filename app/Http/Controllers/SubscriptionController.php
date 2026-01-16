@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Plan;
 use App\Models\Subscription;
 use App\Interfaces\PaymentGatewayInterface;
+use App\Notifications\SubscriptionCancelledNotification;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class SubscriptionController extends Controller
 {
@@ -78,5 +80,31 @@ class SubscriptionController extends Controller
             'message' => 'Troca de plano iniciada. Realize o pagamento para concluir.',
             'payment_url' => $gatewayResult['payment_url'],
         ], 200);
+    }
+
+    public function cancel(Request $request)
+    {
+        $user = $request->user();
+
+        $subscription = $user->subscriptions()
+            ->where('status', 'active')
+            ->where('auto_renew', true)
+            ->first();
+
+        if (!$subscription) {
+            return response()->json(['message' => 'Nenhuma assinatura ativa encontrada para cancelar.'], 404);
+        }
+
+        try {
+            $this->paymentGateway->cancelSubscription($subscription->gateway_id);
+        } catch (\Exception $e) {
+            Log::error('Erro ao cancelar no gateway: ' . $e->getMessage());
+        }
+
+        $subscription->update(['auto_renew' => false]);
+
+        $user->notify(new SubscriptionCancelledNotification());
+
+        return response()->json(['message' => 'Renovação automática cancelada. Seu acesso continua até o fim do período.'], 200);
     }
 }

@@ -37,6 +37,7 @@ class WebhookController extends Controller
                 $oldSubscription->update([
                     'status' => 'cancelled',
                     'ends_at' => now(),
+                    'auto_renew' => false,
                 ]);
             }
 

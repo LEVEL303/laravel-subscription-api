@@ -36,7 +36,7 @@ class FeatureAccessTest extends TestCase
             'user_id' => $user->id,
             'plan_id' => $plan->id,
             'status' => 'active',
-            'ends_at' => now(),
+            'ends_at' => now()->addMonth(),
         ]);
 
         Sanctum::actingAs($user, ['*']);
