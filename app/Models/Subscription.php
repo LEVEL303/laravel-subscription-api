@@ -13,6 +13,7 @@ class Subscription extends Model
         'user_id',
         'plan_id',
         'gateway_id',
+        'payment_url',
         'status',
         'locked_price',
         'started_at',

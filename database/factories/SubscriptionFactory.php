@@ -22,6 +22,7 @@ class SubscriptionFactory extends Factory
         return [
             'user_id' => User::factory(),
             'plan_id' => Plan::factory(),
+            'payment_url' => fake()->url(),
             'gateway_id' => 'tx' . Str::random(15),
             'status' => 'pending',
             'locked_price' => 1000,

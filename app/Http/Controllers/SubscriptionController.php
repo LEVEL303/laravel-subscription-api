@@ -30,7 +30,26 @@ class SubscriptionController extends Controller
             ], 409);
         }
 
-        $plan = Plan::findOrFail($request->plan_id);
+        $plan = Plan::where('id', $request->plan_id)
+            ->where('status', 'active')
+            ->first();
+
+        if (!$plan) {
+            return response()->json(['message' => 'Este plano não está disponível.'], 422);
+        }
+
+        $pendingSubscription = $user->subscriptions()
+            ->where('status', 'pending')
+            ->where('plan_id', $plan->id)
+            ->first();
+
+        if ($pendingSubscription) {
+            return response()->json([
+                'message' => 'Você já possui uma assinatura pendente para este plano. Prossiga para o pagamento.',
+                'subscription_id' => $pendingSubscription->id,
+                'payment_url' => $pendingSubscription->payment_url,
+            ], 200);
+        }
 
         $gatewayResult = $this->paymentGateway->createPaymentIntent($user, $plan, $plan->price);
 
@@ -38,6 +57,7 @@ class SubscriptionController extends Controller
             'user_id' => $user->id,
             'plan_id' => $plan->id,
             'gateway_id' => $gatewayResult['gateway_id'],
+            'payment_url' => $gatewayResult['payment_url'],
             'status' => 'pending',
             'locked_price' => $plan->price,
         ]);
@@ -60,18 +80,37 @@ class SubscriptionController extends Controller
             return response()->json(['message' => 'Não há assinatura ativa para alterar.'], 404);
         }
 
-        if ($currentSubscription->id === $request->plan_id) {
-            return response()->json(['message', 'Você já está neste plano.'], 422);
+        if ($currentSubscription->plan_id === $request->plan_id) {
+            return response()->json(['message' => 'Você já está neste plano.'], 422);
         }
 
-        $newPlan = Plan::findOrFail($request->plan_id);
+        $newPlan = Plan::where('id', $request->plan_id)
+            ->where('status', 'active')
+            ->first();
+        
+        if (!$newPlan) {
+            return response()->json(['message' => 'Este plano não está disponível.'], 422);
+        }    
 
+        $pendingSubscription = $user->subscriptions()
+            ->where('status', 'pending')
+            ->where('plan_id', $newPlan->id)
+            ->first();
+
+        if ($pendingSubscription) {
+            return response()->json([
+                'message' => 'Você já possui uma assinatura pendente para este plano. Prossiga para o pagamento.',
+                'payment_url' => $pendingSubscription->payment_url,
+            ], 200);
+        }        
+        
         $gatewayResult = $this->paymentGateway->swapSubscription($user, $newPlan, $currentSubscription);
 
         Subscription::create([
             'user_id' => $user->id,
             'plan_id' => $newPlan->id,
             'gateway_id' => $gatewayResult['gateway_id'],
+            'payment_url' => $gatewayResult['payment_url'],
             'status' => 'pending',
             'locked_price' => $gatewayResult['amount_to_pay'],
         ]);
