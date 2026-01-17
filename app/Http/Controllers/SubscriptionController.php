@@ -51,6 +51,36 @@ class SubscriptionController extends Controller
             ], 200);
         }
 
+        $hasTrial = $plan->trial_days > 0;
+        $alreadyUsedTrial = $user->subscriptions()->where('plan_id', $plan->id)->exists();
+
+        if ($hasTrial && !$alreadyUsedTrial) {
+            $gatewayId = $this->paymentGateway->startTrial($user, $plan);
+
+            $started_at = now();
+            $ends_at = $started_at->copy()->addDays($plan->trial_days);
+            $trial_ends_at = $ends_at;
+
+            $subscription = Subscription::create([
+                'user_id' => $user->id,
+                'plan_id' => $plan->id,
+                'gateway_id' => $gatewayId,
+                'payment_url' => null,
+                'status' => 'active',
+                'locked_price' => $plan->price,
+                'started_at' => $started_at,
+                'ends_at' => $ends_at,
+                'trial_ends_at' => $trial_ends_at,
+                'auto_renew' => false,
+            ]);
+
+            return response()->json([
+                'message' => 'Período de teste iniciado com sucesso!',
+                'subscription_id' => $subscription->id,
+                'trial_ends_at' => $subscription->trial_ends_at,
+            ], 201);
+        }
+
         $gatewayResult = $this->paymentGateway->createPaymentIntent($user, $plan, $plan->price);
 
         $subscription = Subscription::create([

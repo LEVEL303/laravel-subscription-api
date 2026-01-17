@@ -31,4 +31,9 @@ class MockPaymentGateway implements PaymentGatewayInterface
     {
         return;
     }
+
+    public function startTrial(User $user, Plan $plan): string
+    {
+        return 'trial_' . Str::random(15);
+    }
 }

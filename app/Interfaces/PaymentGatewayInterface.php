@@ -13,4 +13,6 @@ interface PaymentGatewayInterface
     public function swapSubscription(User $user, Plan $newPlan, Subscription $currentSubscription): array;
 
     public function cancelSubscription(string $gatewayId): void;
+
+    public function startTrial(User $user, Plan $plan): string;
 }
