@@ -41,15 +41,15 @@ class WebhookController extends Controller
                 ]);
             }
 
-            $startDate = now();
-            $endsDate = $subscription->plan->period === 'yearly'
-                ? $startDate->copy()->addYear()
-                : $startDate->copy()->addMonth();
+            $startedAt = now();
+            $endsAt = $subscription->plan->period === 'yearly'
+                ? $startedAt->copy()->addYear()->endOfDay()
+                : $startedAt->copy()->addMonth()->endOfDay();
 
             $subscription->update([
                 'status' => 'active',
-                'started_at' => $startDate,
-                'ends_at' => $endsDate, 
+                'started_at' => $startedAt,
+                'ends_at' => $endsAt, 
             ]);
 
             if ($isSwap) {

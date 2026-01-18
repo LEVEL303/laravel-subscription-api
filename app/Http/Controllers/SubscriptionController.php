@@ -57,9 +57,9 @@ class SubscriptionController extends Controller
         if ($hasTrial && !$alreadyUsedTrial) {
             $gatewayId = $this->paymentGateway->startTrial($user, $plan);
 
-            $started_at = now();
-            $ends_at = $started_at->copy()->addDays($plan->trial_days);
-            $trial_ends_at = $ends_at;
+            $startedAt = now();
+            $endsAt = $startedAt->copy()->addDays($plan->trial_days)->endOfDay();
+            $trialEndsAt = $endsAt;
 
             $subscription = Subscription::create([
                 'user_id' => $user->id,
@@ -68,9 +68,9 @@ class SubscriptionController extends Controller
                 'payment_url' => null,
                 'status' => 'active',
                 'locked_price' => $plan->price,
-                'started_at' => $started_at,
-                'ends_at' => $ends_at,
-                'trial_ends_at' => $trial_ends_at,
+                'started_at' => $startedAt,
+                'ends_at' => $endsAt,
+                'trial_ends_at' => $trialEndsAt,
                 'auto_renew' => false,
             ]);
 
