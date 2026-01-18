@@ -75,6 +75,7 @@ class PlanTest extends TestCase
             'name' => 'Plano Pro',
             'description' => 'Acesso total',
             'price' => '1990',
+            'trial_days' => 14,
             'period' => 'monthly',
             'status' => 'active', 
         ]); 
@@ -83,8 +84,13 @@ class PlanTest extends TestCase
         $response->assertJson(['message' => 'Plano cadastrado com sucesso!']);
 
         $this->assertDatabaseHas('plans', [
+            'name' => 'Plano Pro',
+            'description' => 'Acesso total',
             'slug' => 'plano-pro',
             'price' => '1990',
+            'trial_days' => 14,
+            'period' => 'monthly',
+            'status' => 'active', 
         ]);
     }
 
@@ -129,6 +135,7 @@ class PlanTest extends TestCase
         $plan = Plan::factory()->create([
             'name' => 'Plano Antigo',
             'price' => 2000,
+            'trial_days' => 0,
             'period' => 'monthly',
             'status' => 'inactive',
         ]);
@@ -137,6 +144,7 @@ class PlanTest extends TestCase
             'name' => 'Plano Novo',
             'description' => 'Descrição atualizada',
             'price' => 3000,
+            'trial_days' => 14,
             'period' => 'yearly',
             'status' => 'active',
         ]);
@@ -150,6 +158,7 @@ class PlanTest extends TestCase
             'slug' => 'plano-novo',
             'description' => 'Descrição atualizada',
             'price' => 3000,
+            'trial_days' => 14,
             'period' => 'yearly',
             'status' => 'active',
         ]);

@@ -14,12 +14,14 @@ class Plan extends Model
         'slug',
         'description',
         'price',
+        'trial_days',
         'period',
         'status',
     ];
 
     protected $casts = [
         'price' => 'integer',
+        'trial_days' => 'integer',
     ];
 
     public function subscriptions()

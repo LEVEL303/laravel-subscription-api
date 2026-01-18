@@ -20,7 +20,7 @@ class PlanController extends Controller
         }
 
         $plans = $plans->where('status', 'active')
-            ->select('id', 'name', 'slug', 'description', 'price', 'period')
+            ->select('id', 'name', 'slug', 'description', 'price', 'trial_days', 'period')
             ->get();
 
         return response()->json($plans, 200);
@@ -32,6 +32,7 @@ class PlanController extends Controller
             'name' => ['required', 'string', 'max:191', 'unique:plans,name'],
             'description' => ['required', 'string'],
             'price' => ['required', 'integer'],
+            'trial_days' => ['nullable', 'integer', 'min:0'],
             'period' => ['required', 'string', 'in:monthly,yearly'],
             'status' => ['required', 'string', 'in:active,inactive'],
         ]);
@@ -51,6 +52,7 @@ class PlanController extends Controller
             'name' => ['required', 'string', 'max:191', 'unique:plans,name,' . $plan->id],
             'description' => ['required', 'string'],
             'price' => ['required', 'integer'],
+            'trial_days' => ['nullable', 'integer', 'min:0'],
             'period' => ['required', 'string', 'in:monthly,yearly'],
             'status' => ['required', 'string', 'in:active,inactive'],
         ]);
@@ -93,7 +95,7 @@ class PlanController extends Controller
 
         if ($plan->status === "active") {
             return response()->json(
-                $plan->only(['id', 'name', 'slug', 'description', 'price', 'period']),
+                $plan->only(['id', 'name', 'slug', 'description', 'price', 'trial_days', 'period']),
                 200
             );
         }
