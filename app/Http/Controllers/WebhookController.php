@@ -60,11 +60,16 @@ class WebhookController extends Controller
                 ? $startedAt->copy()->addYear()->endOfDay()
                 : $startedAt->copy()->addMonth()->endOfDay();
 
-            $subscription->update([
+            $attributes = [
                 'status' => 'active',
-                'started_at' => $startedAt,
                 'ends_at' => $endsAt, 
-            ]);
+            ];
+
+            if ($subscription->status !== 'inactive') { 
+                $attributes['started_at'] = $startedAt;
+            }
+
+            $subscription->update($attributes);
 
             if ($isSwap) {
                 $subscription->user->notify(new SubscriptionPlanChangedNotification());
