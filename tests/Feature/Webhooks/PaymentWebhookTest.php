@@ -43,12 +43,12 @@ class PaymentWebhookTest extends TestCase
         Notification::assertSentTo($subscription->user, SubscriptionActiveNotification::class);
     }
 
-    public function testWebhookNotifiesUserOnPaymentFailure()
+    public function testWebhookSuspendsSubscriptionOnRecurringPaymentFailure()
     {
         Notification::fake();
 
         $subscription = Subscription::factory()->create([
-            'status' => 'pending',
+            'status' => 'active',
             'gateway_id' => 'tx_fail_123',
         ]);
 
@@ -63,7 +63,7 @@ class PaymentWebhookTest extends TestCase
 
         $this->assertDatabaseHas('subscriptions', [
             'id' => $subscription->id,
-            'status' => 'pending', 
+            'status' => 'inactive', 
         ]);
 
         Notification::assertSentTo($subscription->user, SubscriptionPaymentFailedNotification::class);
