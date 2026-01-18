@@ -9,7 +9,7 @@ use Illuminate\Console\Command;
 class CheckSubscriptionExpirations extends Command
 {
     protected $signature = 'subscriptions:expire';
-    protected $description = 'Verifica assinaturas ativas que venceram e altera status para expired';
+    protected $description = 'Check active subscriptions that have expired and change their status to expired.';
 
     public function handle()
     {
