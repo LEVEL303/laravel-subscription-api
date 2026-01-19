@@ -13,10 +13,12 @@ return new class extends Migration
     {
         Schema::create('webhook_logs', function (Blueprint $table) {
             $table->id();
+            $table->string('gateway_event_id')->unique();
             $table->string('event_type');
             $table->json('payload');
             $table->timestamp('processed_at')->nullable();
             $table->string('status')->default('pending');
+            $table->text('error_message')->nullable();
             $table->timestamps();
         });
     }

@@ -24,16 +24,24 @@ class PaymentWebhookTest extends TestCase
             'status' => 'pending',
         ]);
 
-        $response = $this->postJson(route('webhooks.payment'), [
+        $payload = [
             'event' => 'invoice.paid',
             'gateway_id' => 'tx_123456',
-        ]);
+            'webhook_id' => 'evt_123456',
+        ];
+
+        $response = $this->postJson(route('webhooks.payment'), $payload);
 
         $response->assertStatus(200);
 
         $this->assertDatabaseHas('subscriptions', [
             'id' => $subscription->id,
             'status' => 'active',
+        ]);
+
+        $this->assertDatabaseHas('webhook_logs', [
+            'gateway_event_id' => 'evt_123456',
+            'status' => 'processed',
         ]);
 
         $subscription->refresh();
@@ -55,6 +63,7 @@ class PaymentWebhookTest extends TestCase
         $payload = [
             'event' => 'invoice.payment_failed',
             'gateway_id' => 'tx_fail_123',
+            'webhook_id' => 'evt_123',
         ];
 
         $response = $this->postJson(route('webhooks.payment'), $payload);
@@ -64,6 +73,11 @@ class PaymentWebhookTest extends TestCase
         $this->assertDatabaseHas('subscriptions', [
             'id' => $subscription->id,
             'status' => 'inactive', 
+        ]);
+
+        $this->assertDatabaseHas('webhook_logs', [
+            'gateway_event_id' => 'evt_123',
+            'status' => 'processed'
         ]);
 
         Notification::assertSentTo($subscription->user, SubscriptionPaymentFailedNotification::class);
@@ -86,10 +100,13 @@ class PaymentWebhookTest extends TestCase
             'gateway_id' => 'tx_swap_999',
         ]);
 
-        $this->postJson(route('webhooks.payment'), [
+        $payload = [
             'event' => 'invoice.paid',
             'gateway_id' => 'tx_swap_999',
-        ]);
+            'webhook_id' => 'evt_999'
+        ];
+
+        $this->postJson(route('webhooks.payment'), $payload);
 
         $this->assertDatabaseHas('subscriptions', [
             'id' => $oldSub->id,
@@ -101,6 +118,42 @@ class PaymentWebhookTest extends TestCase
             'status' => 'active',
         ]);
 
+        $this->assertDatabaseHas('webhook_logs', [
+            'gateway_event_id' => 'evt_999',
+            'status' => 'processed'
+        ]);
+
         Notification::assertSentTo($user, SubscriptionPlanChangedNotification::class);
     }
+
+    public function testWebhookIsIdempotentIgnoresDuplicateEvents()
+    {
+        $subscription = Subscription::factory()->create([
+            'gateway_id' => 'tx_duplicate',
+            'status' => 'active',
+            'ends_at' => now()->addMonth(),
+        ]);
+
+        $payload = [
+            'event' => 'invoice.paid',
+            'gateway_id' => 'tx_duplicate',
+            'webhook_id' => 'evt_duplicate_unique_id',
+        ];
+
+        $this->postJson(route('webhooks.payment'), $payload)->assertStatus(200);
+
+        $subscription->refresh();
+        $firstEndsAt = $subscription->ends_at;
+
+        $response = $this->postJson(route('webhooks.payment'), $payload);
+
+        $response->assertStatus(200);
+        $response->assertJson(['message' => 'Event already processed']);
+
+        $subscription->refresh();
+        $this->assertEquals($firstEndsAt, $subscription->ends_at);
+        
+        $this->assertDatabaseCount('webhook_logs', 1);
+    }
 }
+
