@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('subscription_id')->constrained();
             $table->string('transaction_id')->nullable()->unique();
             $table->integer('amount');
-            $table->string('status');
+            $table->string('status')->index();
             $table->string('payment_method')->nullable();
             $table->timestamp('paid_at')->nullable();
             $table->timestamp('due_at')->nullable();

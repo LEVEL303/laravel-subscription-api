@@ -15,7 +15,9 @@ use App\Http\Controllers\WebhookController;
 use App\Http\Controllers\InvoiceController;
 
 Route::get('/user', function (Request $request) {
-    return $request->user();
+    return $request->user()->load(['subscriptions' => function ($query) {
+        $query->where('status', 'active');
+    }, 'subscriptions.plan']);
 })->middleware('auth:sanctum');
 
 Route::post('/register', [RegisterController::class, 'store'])->name('register.store');

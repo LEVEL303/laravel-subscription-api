@@ -13,11 +13,11 @@ return new class extends Migration
     {
         Schema::create('subscriptions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained();
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('plan_id')->constrained();
             $table->string('gateway_id')->nullable()->unique();
             $table->text('payment_url')->nullable();
-            $table->string('status')->default('pending');
+            $table->string('status')->default('pending')->index();
             $table->integer('locked_price');
             $table->timestamp('started_at')->nullable();
             $table->timestamp('ends_at')->nullable();

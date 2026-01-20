@@ -15,11 +15,11 @@ return new class extends Migration
             $table->id();
             $table->string('name')->unique();
             $table->string('slug')->unique();
-            $table->text('description');
+            $table->text('description')->nullable();
             $table->integer('price');
-            $table->integer('trial_days')->nullable();
+            $table->integer('trial_days')->default(0);
             $table->string('period');
-            $table->string('status')->default('active');
+            $table->string('status')->default('active')->index();
             $table->timestamps();
         });
     }
