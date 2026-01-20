@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained();
             $table->foreignId('subscription_id')->constrained();
-            $table->string('gateway_id')->nullable();
+            $table->string('transaction_id')->nullable()->unique();
             $table->integer('amount');
             $table->string('status');
             $table->string('payment_method')->nullable();

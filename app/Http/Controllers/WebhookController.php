@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Subscription;
 use App\Models\WebhookLog;
+use App\Models\Invoice;
 use App\Notifications\SubscriptionActiveNotification;
 use App\Notifications\SubscriptionPaymentFailedNotification;
 use App\Notifications\SubscriptionPlanChangedNotification;
@@ -19,6 +20,9 @@ class WebhookController extends Controller
             'event' => ['required', 'string'],
             'gateway_id' => ['required', 'string'],
             'webhook_id' => ['required', 'string'],
+            'transaction_id' => ['required', 'string'],
+            'amount_paid' => ['required', 'numeric'],
+            'payment_method' => ['required', 'string'],
         ]);
 
         $log = WebhookLog::firstOrCreate(
@@ -93,6 +97,17 @@ class WebhookController extends Controller
                         $subscription->user->notify(new SubscriptionActiveNotification());
                     }
                 }
+
+                Invoice::create([
+                    'user_id' => $subscription->user_id,
+                    'subscription_id' => $subscription->id,
+                    'transaction_id' => $request->transaction_id,
+                    'amount' => (int) ($request->amount_paid * 100),
+                    'status' => 'paid',
+                    'payment_method' => $request->payment_method,
+                    'paid_at' => now(),
+                    'due_at' => now(),
+                ]);
             }
 
             $log->update([

@@ -12,6 +12,7 @@ use App\Http\Controllers\PlanController;
 use App\Http\Controllers\PlanFeatureController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\WebhookController;
+use App\Http\Controllers\InvoiceController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -48,5 +49,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/subscriptions/swap', [SubscriptionController::class, 'swap'])->name('subscriptions.swap');
     Route::delete('/subscriptions', [SubscriptionController::class, 'cancel'])->name('subscriptions.cancel');
 });
+
+Route::get('/invoices', [InvoiceController::class, 'index'])
+    ->middleware('auth:sanctum')
+    ->name('invoices.index');
 
 Route::post('/webhooks/payment', [WebhookController::class, 'handle'])->name('webhooks.payment');

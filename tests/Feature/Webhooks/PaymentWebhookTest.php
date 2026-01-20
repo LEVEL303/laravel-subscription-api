@@ -22,12 +22,16 @@ class PaymentWebhookTest extends TestCase
         $subscription = Subscription::factory()->create([
             'gateway_id' => 'tx_123456',
             'status' => 'pending',
+            'locked_price' => 2990
         ]);
 
         $payload = [
             'event' => 'invoice.paid',
             'gateway_id' => 'tx_123456',
             'webhook_id' => 'evt_123456',
+            'transaction_id' => 'recibo_001',
+            'amount_paid' => 29.90,
+            'payment_method' => 'credit_card',
         ];
 
         $response = $this->postJson(route('webhooks.payment'), $payload);
@@ -37,6 +41,14 @@ class PaymentWebhookTest extends TestCase
         $this->assertDatabaseHas('subscriptions', [
             'id' => $subscription->id,
             'status' => 'active',
+        ]);
+
+        $this->assertDatabaseHas('invoices', [
+            'subscription_id' => $subscription->id,
+            'transaction_id' => 'recibo_001',
+            'amount' => 2990,
+            'status' => 'paid',
+            'payment_method' => 'credit_card',
         ]);
 
         $this->assertDatabaseHas('webhook_logs', [
@@ -64,6 +76,9 @@ class PaymentWebhookTest extends TestCase
             'event' => 'invoice.payment_failed',
             'gateway_id' => 'tx_fail_123',
             'webhook_id' => 'evt_123',
+            'transaction_id' => 'recibo_fail', 
+            'amount_paid' => 0,
+            'payment_method' => 'unknown',
         ];
 
         $response = $this->postJson(route('webhooks.payment'), $payload);
@@ -103,7 +118,10 @@ class PaymentWebhookTest extends TestCase
         $payload = [
             'event' => 'invoice.paid',
             'gateway_id' => 'tx_swap_999',
-            'webhook_id' => 'evt_999'
+            'webhook_id' => 'evt_999',
+            'transaction_id' => 'recibo_swap',
+            'amount_paid' => 50.00,
+            'payment_method' => 'pix',
         ];
 
         $this->postJson(route('webhooks.payment'), $payload);
@@ -116,6 +134,14 @@ class PaymentWebhookTest extends TestCase
         $this->assertDatabaseHas('subscriptions', [
             'id' => $newSub->id,
             'status' => 'active',
+        ]);
+
+        $this->assertDatabaseHas('invoices', [
+            'subscription_id' => $newSub->id,
+            'transaction_id' => 'recibo_swap',
+            'amount' => 5000,
+            'status' => 'paid',
+            'payment_method' => 'pix',
         ]);
 
         $this->assertDatabaseHas('webhook_logs', [
@@ -138,12 +164,16 @@ class PaymentWebhookTest extends TestCase
             'event' => 'invoice.paid',
             'gateway_id' => 'tx_duplicate',
             'webhook_id' => 'evt_duplicate_unique_id',
+            'transaction_id' => 'recibo_dup',
+            'amount_paid' => 29.90,
+            'payment_method' => 'credit_card',
         ];
 
         $this->postJson(route('webhooks.payment'), $payload)->assertStatus(200);
 
         $subscription->refresh();
         $firstEndsAt = $subscription->ends_at;
+        $this->assertDatabaseCount('invoices', 1);
 
         $response = $this->postJson(route('webhooks.payment'), $payload);
 
@@ -152,7 +182,8 @@ class PaymentWebhookTest extends TestCase
 
         $subscription->refresh();
         $this->assertEquals($firstEndsAt, $subscription->ends_at);
-        
+
+        $this->assertDatabaseCount('invoices', 1);
         $this->assertDatabaseCount('webhook_logs', 1);
     }
 }
