@@ -13,9 +13,9 @@ class FeatureSeeder extends Seeder
      */
     public function run(): void
     {
-        Feature::create(['code' => 'limited_users', 'description' => 'Limite de 5 usuários']);
-        Feature::create(['code' => 'unlimited_users', 'description' => 'Usuários ilimitados']);
-        Feature::create(['code' => 'api_access', 'description' => 'Acesso à API']);
-        Feature::create(['code' => 'priority_support', 'description' => 'Suporte Prioritário']);
+        Feature::create(['name' => 'Limited users', 'code' => 'limited-users', 'description' => 'Limite de 5 usuários']);
+        Feature::create(['name' => 'Unlimited users', 'code' => 'unlimited-users', 'description' => 'Usuários ilimitados']);
+        Feature::create(['name' => 'Api access', 'code' => 'api-access', 'description' => 'Acesso à API']);
+        Feature::create(['name' => 'Priority support', 'code' => 'priority-support', 'description' => 'Suporte Prioritário']);
     }
 }

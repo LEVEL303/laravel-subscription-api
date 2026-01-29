@@ -165,7 +165,7 @@ class SubscriptionController extends Controller
         }
 
         try {
-            $this->paymentGateway->cancelSubscription($subscription->gateway_id);
+            $this->paymentGateway->cancelSubscription($subscription);
         } catch (\Exception $e) {
             Log::error('Erro ao cancelar no gateway: ' . $e->getMessage());
         }

@@ -21,14 +21,14 @@ class FeatureAccessTest extends TestCase
 
         Route::get('/test-vip-route', function () {
             return 'Acesso Permitido';
-        })->middleware(['auth:sanctum', 'check.feature:vip_reports']);
+        })->middleware(['auth:sanctum', 'check.feature:vip-reports']);
     }
 
     public function testUserWithCorrectPlanFeatureCanAccessRoute()
     {
         $user = User::factory()->create();
         $plan = Plan::factory()->create();
-        $feature = Feature::factory()->create(['code' => 'vip_reports']);
+        $feature = Feature::factory()->create(['code' => 'vip-reports']);
 
         $plan->features()->attach($feature);
 
@@ -69,7 +69,7 @@ class FeatureAccessTest extends TestCase
     {
         $user = User::factory()->create();
         $plan = Plan::factory()->create();
-        $feature = Feature::factory()->create(['code' => 'vip_reports']);
+        $feature = Feature::factory()->create(['code' => 'vip-reports']);
 
         $plan->features()->attach($feature);
 

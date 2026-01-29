@@ -27,7 +27,7 @@ class MockPaymentGateway implements PaymentGatewayInterface
         ];
     }
 
-    public function cancelSubscription(string $gatewayId): void
+    public function cancelSubscription(Subscription $subscription): void
     {
         return;
     }
