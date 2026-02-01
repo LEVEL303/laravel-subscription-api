@@ -9,7 +9,6 @@ use App\Http\Controllers\Auth\LogoutController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\PlanController;
-use App\Http\Controllers\PlanFeatureController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\WebhookController;
 use App\Http\Controllers\InvoiceController;
@@ -36,15 +35,6 @@ Route::post('/reset-password', ResetPasswordController::class)->name('password.u
 
 Route::get('/plans', [PlanController::class, 'index'])->name('plans.index');
 Route::get('plans/{plan:slug}', [PlanController::class, 'show'])->name('plans.show');
-
-Route::middleware(['auth:sanctum', 'admin'])->group(function () {
-    Route::post('/plans', [PlanController::class, 'store'])->name('plans.store');
-    Route::put('/plans/{plan}', [PlanController::class, 'update'])->name('plans.update');
-    Route::delete('/plans/{plan}', [PlanController::class, 'destroy'])->name('plans.destroy');
-    Route::get('/features', [PlanFeatureController::class, 'index'])->name('features.index');
-    Route::post('/plans/{plan}/features', [PlanFeatureController::class, 'store'])->name('plans.features.store');
-    Route::delete('/plans/{plan}/features/{feature}', [PlanFeatureController::class, 'destroy'])->name('plans.features.destroy');
-});
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/subscriptions', [SubscriptionController::class, 'store'])->name('subscriptions.store');
