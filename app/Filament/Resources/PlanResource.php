@@ -162,18 +162,35 @@ class PlanResource extends Resource
                         $record->features()->detach($data['features_id']);
                         
                         Notification::make()
-                            ->title('Funcionalidades desvinculadas!')
+                            ->title('Funcionalidades desvinculadas')
                             ->success()
                             ->send();
                     }),
 
                 Tables\Actions\EditAction::make(),
+
+                Tables\Actions\DeleteAction::make()
+                    ->action(function (Plan $record) {
+                        if ($record->subscriptions()->exists()) {
+                            $record->update(['status' => 'inactive']);
+
+                            Notification::make()
+                                ->title('Plano inativado')
+                                ->body('Este plano possui assinaturas vinculadas. Ele foi marcado como "Inativo" para preservar o histórico.')
+                                ->warning()
+                                ->send();
+
+                        } else {
+                            $record->delete();
+
+                            Notification::make()
+                                ->title('Plano excluído')
+                                ->success()
+                                ->send();
+                        }
+                    }),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
-            ]);
+            ->bulkActions([]);
     }
 
     public static function getRelations(): array

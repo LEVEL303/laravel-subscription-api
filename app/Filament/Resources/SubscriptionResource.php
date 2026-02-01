@@ -112,7 +112,7 @@ class SubscriptionResource extends Resource
                             ]);
 
                             Notification::make()
-                                ->title('Assinatura cancelada com sucesso')
+                                ->title('Assinatura cancelada')
                                 ->success()
                                 ->send();
 

@@ -39,6 +39,7 @@ class FeatureResource extends Resource
                     ->unique(ignoreRecord: true)
                     ->readOnly(), 
                 Forms\Components\Textarea::make('description')
+                    ->label('Descrição')
                     ->maxLength(191)
                     ->columnSpanFull(),
             ]);
@@ -64,6 +65,7 @@ class FeatureResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
